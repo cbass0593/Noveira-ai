@@ -5,6 +5,9 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Compile & Package Android Release Bundle
@@ -182,16 +185,26 @@ jobs:
           sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 36/' android/variables.gradle
           sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 26/' android/variables.gradle
 
-      - name: Create Production Upload Keystore
+      - name: Setup Permanent Keystore
         run: |
-          keytool -genkeypair -v -keystore android/app/upload.keystore \
-            -alias noveira-upload \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass noveira2026 \
-            -keypass noveira2026 \
-            -dname "CN=Noveira AI, OU=Mobile, O=Apex Innovationz, C=US"
+          if [ ! -f release.keystore ]; then
+            echo "Generating permanent keystore..."
+            keytool -genkeypair -v -keystore release.keystore \
+              -alias noveira-permanent \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -storepass noveira2026 \
+              -keypass noveira2026 \
+              -dname "CN=Noveira AI, OU=Mobile, O=Apex Innovationz, C=US"
+            
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add release.keystore
+            git commit -m "Lock permanent release keystore" || true
+            git push || true
+          fi
+          cp release.keystore android/app/upload.keystore
 
           cat << 'EOF' >> android/app/build.gradle
           android {
@@ -199,7 +212,7 @@ jobs:
                   release {
                       storeFile file('upload.keystore')
                       storePassword 'noveira2026'
-                      keyAlias 'noveira-upload'
+                      keyAlias 'noveira-permanent'
                       keyPassword 'noveira2026'
                   }
               }
@@ -221,6 +234,6 @@ jobs:
       - name: Upload AAB Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: noveira-ai-release-aab-final
+          name: noveira-ai-release-aab-permanent
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 7
