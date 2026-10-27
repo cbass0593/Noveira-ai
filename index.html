@@ -45,6 +45,13 @@
       border: 1px solid #3D246C;
       border-radius: 14px;
     }
+    input, select {
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus {
+      border-color: #E0B865 !important;
+    }
   </style>
 </head>
 <body>
@@ -62,22 +69,38 @@
     ];
 
     function App() {
+      // User authentication state
+      const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem('noveira_user');
+        return savedUser ? JSON.parse(savedUser) : null;
+      });
+
+      // Navigation: 'closet', 'stylist', 'premium', 'account'
       const [tab, setTab] = useState('closet');
       const [filter, setFilter] = useState('All');
+
+      // Auth form state
+      const [isSignUp, setIsSignUp] = useState(false);
+      const [authEmail, setAuthEmail] = useState('');
+      const [authPassword, setAuthPassword] = useState('');
+      const [authName, setAuthName] = useState('');
+
+      // Premium subscription plan state
+      const [selectedPlan, setSelectedPlan] = useState('monthly');
+      const [subscribedMessage, setSubscribedMessage] = useState(false);
+
+      // Wardrobe state
       const [items, setItems] = useState(() => {
         const local = localStorage.getItem('noveira_web_closet');
         return local ? JSON.parse(local) : DEFAULT_CLOTHES;
       });
 
-      // Form state
       const [name, setName] = useState('');
       const [category, setCategory] = useState('Tops');
       const [brand, setBrand] = useState('');
-      const [color, setColor] = useState('');
 
       // Stylist state
       const [occasion, setOccasion] = useState('Dinner Date & Cocktails');
-      const [weather, setWeather] = useState('Cool Evening / Autumn');
       const [styledLook, setStyledLook] = useState(null);
       const [loadingStylist, setLoadingStylist] = useState(false);
 
@@ -85,21 +108,51 @@
         localStorage.setItem('noveira_web_closet', JSON.stringify(items));
       }, [items]);
 
+      useEffect(() => {
+        if (user) {
+          localStorage.setItem('noveira_user', JSON.stringify(user));
+        } else {
+          localStorage.removeItem('noveira_user');
+        }
+      }, [user]);
+
+      const handleLogin = (e) => {
+        e.preventDefault();
+        if (!authEmail.trim() || !authPassword.trim()) return;
+        setUser({
+          name: authName.trim() || authEmail.split('@')[0],
+          email: authEmail.trim(),
+          tier: 'free'
+        });
+      };
+
+      const handleSignOut = () => {
+        setUser(null);
+        setTab('closet');
+      };
+
+      const handleUpgrade = () => {
+        if (!user) {
+          setTab('account');
+          return;
+        }
+        setUser({ ...user, tier: selectedPlan === 'monthly' ? 'vip_monthly' : 'vip_annual' });
+        setSubscribedMessage(true);
+        setTimeout(() => setSubscribedMessage(false), 3000);
+      };
+
       const handleAddGarment = (e) => {
         e.preventDefault();
         if (!name.trim()) return;
-        const newItem = {
+        setItems([{
           id: Date.now().toString(),
           name: name.trim(),
           category,
           brand: brand.trim() || 'Custom',
-          color: color.trim() || 'Neutral',
           isFav: false
-        };
-        setItems([newItem, ...items]);
+        }, ...items]);
         setName('');
         setBrand('');
-        setColor('');
       };
 
       const toggleFav = (id) => {
@@ -112,13 +165,6 @@
         }
       };
 
-      const clearAll = () => {
-        if (confirm('Wipe all local wardrobe items and reset your closet?')) {
-          localStorage.clear();
-          setItems([]);
-        }
-      };
-
       const curateOutfit = () => {
         setLoadingStylist(true);
         setTimeout(() => {
@@ -127,7 +173,7 @@
             title: 'Metropolitan Elegance',
             occasion: occasion,
             pieces: items.slice(0, 3),
-            explanation: `Curated exclusively for ${occasion}. The contrast between your ${items[0]?.name || 'Top'} and ${items[1]?.name || 'Bottom'} creates balanced luxury proportions, elevated by tailored outerwear.`
+            explanation: `Curated exclusively for ${occasion}. Combining your ${items[0]?.name || 'Top'} with ${items[1]?.name || 'Bottom'} achieves sleek editorial balance.`
           });
         }, 900);
       };
@@ -137,186 +183,8 @@
       return (
         <div style={{ maxWidth: '480px', margin: '0 auto', minHeight: '100vh', paddingBottom: '80px', position: 'relative' }}>
           
-          {/* Top Editorial Header */}
-          <header style={{ padding: '20px 16px', background: 'rgba(24, 13, 43, 0.95)', borderBottom: '1px solid #3D246C', backdropFilter: 'blur(10px)', sticky: 'top', textAlign: 'center' }}>
-            <h1 className="font-serif gold-gradient-text" style={{ fontSize: '26px', letterSpacing: '4px', fontWeight: 700 }}>NOVEIRA AI</h1>
-            <p style={{ fontSize: '10px', color: '#B9A9D0', letterSpacing: '2.5px', marginTop: '4px', textTransform: 'uppercase' }}>Digital Wardrobe Atelier</p>
-          </header>
-
-          <main style={{ padding: '16px' }}>
-            
-            {/* TAB 1: CLOSET */}
-            {tab === 'closet' && (
-              <div>
-                {/* Add Garment Box */}
-                <form onSubmit={handleAddGarment} className="card-glass" style={{ padding: '18px', marginBottom: '20px' }}>
-                  <h3 className="font-serif" style={{ color: '#E0B865', fontSize: '16px', marginBottom: '14px' }}>Add Garment to Closet</h3>
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Garment name (e.g. Silk Blouse)..."
-                    style={{ width: '100%', padding: '12px', background: '#10061F', border: '1px solid #3D246C', color: '#FAF8F5', borderRadius: '10px', marginBottom: '10px', fontSize: '13px' }}
-                  />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
-                    <select
-                      value={category}
-                      onChange={e => setCategory(e.target.value)}
-                      style={{ padding: '10px', background: '#10061F', border: '1px solid #3D246C', color: '#FAF8F5', borderRadius: '10px', fontSize: '12px' }}
-                    >
-                      <option>Tops</option><option>Bottoms</option><option>Outerwear</option><option>Footwear</option><option>Accessories</option>
-                    </select>
-                    <input
-                      type="text"
-                      value={brand}
-                      onChange={e => setBrand(e.target.value)}
-                      placeholder="Designer / Brand..."
-                      style={{ padding: '10px', background: '#10061F', border: '1px solid #3D246C', color: '#FAF8F5', borderRadius: '10px', fontSize: '12px' }}
-                    />
-                  </div>
-                  <button type="submit" className="gold-btn" style={{ width: '100%', padding: '12px', borderRadius: '10px', fontSize: '13px' }}>
-                    Add to Collection
-                  </button>
-                </form>
-
-                {/* Filter Chips */}
-                <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '12px' }}>
-                  {['All', 'Tops', 'Bottoms', 'Outerwear', 'Footwear', 'Accessories'].map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => setFilter(cat)}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        fontSize: '11px',
-                        border: '1px solid #3D246C',
-                        background: filter === cat ? '#E0B865' : '#180D2B',
-                        color: filter === cat ? '#0E071A' : '#FAF8F5',
-                        fontWeight: filter === cat ? 700 : 500,
-                        whiteSpace: 'nowrap'
-                      }}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Garments Grid */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  {filteredItems.map(item => (
-                    <div key={item.id} className="card-glass" style={{ padding: '14px', position: 'relative' }}>
-                      <span onClick={() => toggleFav(item.id)} style={{ position: 'absolute', top: '10px', right: '10px', cursor: 'pointer', fontSize: '16px' }}>
-                        {item.isFav ? '❤️' : '🤍'}
-                      </span>
-                      <p style={{ fontWeight: 700, fontSize: '13px', color: '#FAF8F5', paddingRight: '20px' }}>{item.name}</p>
-                      <p style={{ fontSize: '11px', color: '#E0B865', marginTop: '4px' }}>{item.category}</p>
-                      <p style={{ fontSize: '10px', color: '#B9A9D0', marginTop: '2px' }}>{item.brand}</p>
-                      <button
-                        onClick={() => deleteItem(item.id)}
-                        style={{ marginTop: '10px', background: 'none', border: 'none', color: '#EF4444', fontSize: '10px', cursor: 'pointer' }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* TAB 2: AI STYLIST */}
-            {tab === 'stylist' && (
-              <div className="card-glass" style={{ padding: '20px', textAlign: 'center' }}>
-                <h2 className="font-serif gold-gradient-text" style={{ fontSize: '22px', marginBottom: '8px' }}>Haute AI Consultation</h2>
-                <p style={{ fontSize: '12px', color: '#B9A9D0', marginBottom: '16px' }}>Personal styling engine strictly analyzing your owned wardrobe.</p>
-
-                <div style={{ textAlign: 'left', marginBottom: '14px' }}>
-                  <label style={{ fontSize: '11px', fontWeight: 600, color: '#E0B865' }}>OCCASION</label>
-                  <select
-                    value={occasion}
-                    onChange={e => setOccasion(e.target.value)}
-                    style={{ width: '100%', padding: '12px', background: '#10061F', border: '1px solid #3D246C', color: '#FAF8F5', borderRadius: '10px', marginTop: '6px', fontSize: '12px' }}
-                  >
-                    <option>Executive Work & Boardroom</option>
-                    <option>Dinner Date & Cocktails</option>
-                    <option>Casual Weekend Chic</option>
-                    <option>Formal Black-Tie Event</option>
-                  </select>
-                </div>
-
-                <button onClick={curateOutfit} className="gold-btn" style={{ width: '100%', padding: '14px', borderRadius: '10px', fontSize: '13px', marginBottom: '16px' }}>
-                  {loadingStylist ? 'Analyzing Closet Silhouettes...' : 'Curate Custom Look'}
-                </button>
-
-                {styledLook && (
-                  <div style={{ background: '#10061F', border: '1px solid #E0B865', borderRadius: '12px', padding: '16px', textAlign: 'left', marginTop: '16px' }}>
-                    <span style={{ fontSize: '10px', color: '#E0B865', fontWeight: 700, letterSpacing: '1px' }}>CURATED COMBINATION</span>
-                    <h3 className="font-serif" style={{ fontSize: '18px', color: '#FAF8F5', margin: '6px 0 10px 0' }}>{styledLook.title}</h3>
-                    <p style={{ fontSize: '12px', color: '#B9A9D0', lineHeight: 1.6, fontStyle: 'italic', marginBottom: '12px' }}>"{styledLook.explanation}"</p>
-                    <div style={{ borderTop: '1px solid #3D246C', paddingTop: '10px' }}>
-                      <p style={{ fontSize: '11px', color: '#E0B865', fontWeight: 600 }}>Garments Selected:</p>
-                      <ul style={{ paddingLeft: '18px', fontSize: '11px', color: '#FAF8F5', marginTop: '6px' }}>
-                        {styledLook.pieces.map(p => <li key={p.id}>{p.name} ({p.category})</li>)}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* TAB 3: PRIVACY & DATA */}
-            {tab === 'privacy' && (
-              <div className="card-glass" style={{ padding: '22px' }}>
-                <h2 className="font-serif" style={{ color: '#E0B865', fontSize: '20px', marginBottom: '12px' }}>Privacy & Data Control</h2>
-                <p style={{ fontSize: '12px', color: '#B9A9D0', lineHeight: 1.6, marginBottom: '16px' }}>
-                  Noveira AI operates on a local-first architecture. All wardrobe pieces and styling preferences reside directly on this device.
-                </p>
-                <div style={{ borderTop: '1px solid #3D246C', paddingTop: '16px', marginBottom: '16px' }}>
-                  <p style={{ fontSize: '12px', color: '#FAF8F5', fontWeight: 600, marginBottom: '6px' }}>Support & Inquiries:</p>
-                  <p style={{ fontSize: '11px', color: '#E0B865' }}>info.apexinnovationz@gmail.com</p>
-                </div>
-                <button
-                  onClick={clearAll}
-                  style={{ width: '100%', padding: '13px', background: '#7F1D1D', color: '#FECACA', border: '1px solid #EF4444', borderRadius: '10px', fontWeight: 700, fontSize: '12px', cursor: 'pointer' }}
-                >
-                  Erase All Wardrobe Data
-                </button>
-              </div>
-            )}
-          </main>
-
-          {/* Bottom Luxury Navigation */}
-          <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, height: '62px', background: 'rgba(24, 13, 43, 0.98)', borderTop: '1px solid #3D246C', display: 'flex', justifyContent: 'space-around', alignItems: 'center', maxWidth: '480px', margin: '0 auto', backdropFilter: 'blur(10px)', zIndex: 100 }}>
-            {[
-              { id: 'closet', label: 'My Closet', icon: '👗' },
-              { id: 'stylist', label: 'AI Stylist', icon: '✨' },
-              { id: 'privacy', label: 'Privacy', icon: '🛡️' }
-            ].map(t => (
-              <button
-                key={t.id}
-                onClick={() => setTab(t.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: tab === t.id ? '#E0B865' : '#8D7B9F',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                <span style={{ fontSize: '18px' }}>{t.icon}</span>
-                <span style={{ fontSize: '10px', fontWeight: tab === t.id ? 700 : 500 }}>{t.label}</span>
-              </button>
-            ))}
-          </nav>
-
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
-</body>
-</html>
+          {/* Top Luxury Header with VIP Badge */}
+          <header style={{ padding: '16px 20px', background: 'rgba(24, 13, 43, 0.95)', borderBottom: '1px solid #3D246C', backdropFilter: 'blur(10px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ textAlign: 'left' }}>
+              <h1 className="font-serif gold-gradient-text" style={{ fontSize: '22px', letterSpacing: '3px', fontWeight: 700 }}>NOVEIRA AI</h1>
+              <p style={{ fontSize: '9px', color: '#B9A9D0', letterSpacing: '2px', textTransform: 'uppercase' }}>Haute Wardrobe Atelier</p>
