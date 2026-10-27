@@ -25,8 +25,9 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses || true
 
       - name: Assemble Noveira AI Web Engine
         run: |
@@ -197,12 +198,11 @@ jobs:
           EOF
           npx cap add android
 
-      - name: Configure Android Package & Target SDK 35
+      - name: Configure Android Package & SDK
         run: |
-          sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 35/' android/app/build.gradle
-          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 35/' android/app/build.gradle
-          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 26/' android/app/build.gradle
-          sed -i 's/applicationId ".*"/applicationId "ai.noveira.app"/' android/app/build.gradle
+          sed -i 's/compileSdkVersion = [0-9]*/compileSdkVersion = 35/' android/variables.gradle || true
+          sed -i 's/targetSdkVersion = [0-9]*/targetSdkVersion = 35/' android/variables.gradle || true
+          sed -i 's/minSdkVersion = [0-9]*/minSdkVersion = 26/' android/variables.gradle || true
 
       - name: Create Production Upload Keystore
         run: |
