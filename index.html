@@ -4,77 +4,336 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Noveira AI — Digital Wardrobe & Personal Stylist</title>
-  
-  <!-- Luxury Editorial Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body {
-      background-color: #0E071A;
-      color: #FAF8F5;
-      font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
+    body { background-color: #0E071A; color: #FAF8F5; font-family: 'Montserrat', sans-serif; min-height: 100vh; padding-bottom: 75px; }
     .font-serif { font-family: 'Playfair Display', Georgia, serif; }
-    .gold-gradient-text {
-      background: linear-gradient(135deg, #FFF5DB 0%, #E0B865 50%, #C9A14F 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .gold-btn {
-      background: linear-gradient(135deg, #F2D594 0%, #E0B865 50%, #C9A14F 100%);
-      color: #0E071A;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 18px rgba(224, 184, 101, 0.25);
-      transition: transform 0.15s ease;
-    }
-    .gold-btn:active { transform: scale(0.97); }
-    .card-glass {
-      background: #180D2B;
-      border: 1px solid #3D246C;
-      border-radius: 14px;
-    }
-    input, select {
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    input:focus, select:focus {
-      border-color: #E0B865 !important;
-    }
-    .nav-btn {
-      background: none;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
+    .gold-text { background: linear-gradient(135deg, #FFF5DB 0%, #E0B865 50%, #C9A14F 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .gold-btn { background: linear-gradient(135deg, #F2D594 0%, #E0B865 50%, #C9A14F 100%); color: #0E071A; font-weight: 700; border: none; cursor: pointer; border-radius: 10px; }
+    .card { background: #180D2B; border: 1px solid #3D246C; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+    input, select { width: 100%; padding: 11px; background: #10061F; border: 1px solid #3D246C; color: #FAF8F5; border-radius: 8px; font-size: 13px; margin-bottom: 8px; outline: none; }
+    input:focus, select:focus { border-color: #E0B865; }
+    .tab-content { display: none; }
+    .tab-active { display: block; }
+    .nav-btn { background: none; border: none; color: #8D7B9F; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; flex: 1; }
+    .nav-btn.active { color: #E0B865; font-weight: 700; }
   </style>
 </head>
 <body>
-  <div style="max-width: 480px; margin: 0 auto; min-height: 100vh; padding-bottom: 80px; position: relative;">
+  <div style="max-width: 480px; margin: 0 auto;">
     
     <!-- Header -->
-    <header style="padding: 16px 20px; background: rgba(24, 13, 43, 0.95); border-bottom: 1px solid #3D246C; display: flex; justify-content: space-between; alignItems: center;">
-      <div style="text-align: left;">
-        <h1 class="font-serif gold-gradient-text" style="font-size: 22px; letter-spacing: 3px; font-weight: 700;">NOVEIRA AI</h1>
+    <header style="padding: 16px 20px; background: #180D2B; border-bottom: 1px solid #3D246C; display: flex; justify-content: space-between; align-items: center; sticky: top;">
+      <div>
+        <h1 class="font-serif gold-text" style="font-size: 22px; letter-spacing: 3px; font-weight: 700;">NOVEIRA AI</h1>
         <p style="font-size: 9px; color: #B9A9D0; letter-spacing: 2px; text-transform: uppercase;">Haute Wardrobe Atelier</p>
       </div>
-      <div id="header-action"></div>
+      <div id="header-badge">
+        <button onclick="switchTab('premium')" class="gold-btn" style="padding: 6px 14px; font-size: 11px;">👑 Upgrade</button>
+      </div>
     </header>
 
-    <!-- Main Content Mount -->
-    <main id="main-content" style="padding: 16px;"></main>
+    <main style="padding: 16px;">
+      
+      <!-- TAB 1: CLOSET -->
+      <section id="tab-closet" class="tab-content tab-active">
+        <form onsubmit="addItem(event)" class="card">
+          <h3 class="font-serif" style="color: #E0B865; font-size: 15px; margin-bottom: 10px;">Add Garment to Closet</h3>
+          <input id="in-name" type="text" required placeholder="Garment name (e.g. Silk Ivory Blouse)..." />
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <select id="in-cat"><option>Tops</option><option>Bottoms</option><option>Outerwear</option><option>Footwear</option><option>Accessories</option></select>
+            <input id="in-brand" type="text" placeholder="Brand / Maison..." />
+          </div>
+          <input id="in-img" type="url" placeholder="Optional Image URL..." />
+          <button type="submit" class="gold-btn" style="width: 100%; padding: 11px; font-size: 12px; margin-top: 4px;">Save to Collection</button>
+        </form>
 
-    <!-- Fixed Bottom 4-Pillar Navigation -->
-    <nav style="position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: rgba(24, 13, 43, 0.98); border-top: 1px solid #3D246C; display: flex; justify-content: space-around; align-items: center; max-width: 480px; margin: 0 auto; backdrop-filter: blur(10px); z-index: 100;">
-      <button onclick="window.app.setTab('closet')" class="nav-btn" id="nav-closet">
-        <span style="font-size: 18px;">👗</span>
-        <span style="font-size: 10px;">My Closet</span>
+        <div style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 8px;">
+          <button onclick="setFilter('All')" class="gold-btn" style="padding: 5px 12px; font-size: 11px;">All</button>
+          <button onclick="setFilter('Tops')" style="padding: 5px 12px; font-size: 11px; background:#180D2B; color:#FAF8F5; border:1px solid #3D246C; border-radius:10px;">Tops</button>
+          <button onclick="setFilter('Bottoms')" style="padding: 5px 12px; font-size: 11px; background:#180D2B; color:#FAF8F5; border:1px solid #3D246C; border-radius:10px;">Bottoms</button>
+          <button onclick="setFilter('Outerwear')" style="padding: 5px 12px; font-size: 11px; background:#180D2B; color:#FAF8F5; border:1px solid #3D246C; border-radius:10px;">Outerwear</button>
+          <button onclick="setFilter('Footwear')" style="padding: 5px 12px; font-size: 11px; background:#180D2B; color:#FAF8F5; border:1px solid #3D246C; border-radius:10px;">Footwear</button>
+        </div>
+
+        <div id="closet-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;"></div>
+      </section>
+
+      <!-- TAB 2: AI STYLIST -->
+      <section id="tab-stylist" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <h2 class="font-serif gold-text" style="font-size: 20px; margin-bottom: 4px;">Haute AI Consultation</h2>
+          <p style="font-size: 11px; color: #B9A9D0; margin-bottom: 14px;">Personal stylist coordinating only your owned pieces.</p>
+          <div style="text-align: left; margin-bottom: 8px;">
+            <label style="font-size: 10px; color: #E0B865; font-weight: 700;">OCCASION</label>
+            <select id="stylist-occ" style="margin-top: 4px;"><option>Dinner Date & Cocktails</option><option>Executive Boardroom</option><option>Casual Weekend Chic</option><option>Formal Black-Tie Gala</option></select>
+          </div>
+          <div style="text-align: left; margin-bottom: 12px;">
+            <label style="font-size: 10px; color: #E0B865; font-weight: 700;">CLIMATE / WEATHER</label>
+            <input id="stylist-clim" type="text" value="Cool Evening / Autumn" style="margin-top: 4px;" />
+          </div>
+          <button onclick="curateLook()" class="gold-btn" style="width: 100%; padding: 13px; font-size: 13px;">Curate Custom Look</button>
+          <div id="stylist-result" style="margin-top: 14px; text-align: left;"></div>
+        </div>
+      </section>
+
+      <!-- TAB 3: VIP ELITE -->
+      <section id="tab-premium" class="tab-content">
+        <div class="card" style="text-align: center;">
+          <div style="font-size: 32px; margin-bottom: 6px;">👑</div>
+          <h2 class="font-serif gold-text" style="font-size: 22px;">NOVEIRA VIP ELITE</h2>
+          <p style="font-size: 10px; color: #B9A9D0; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 16px;">High-Fashion Personal Concierge</p>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+            <div id="plan-monthly" onclick="selectPlan('monthly')" style="padding: 12px; border-radius: 10px; border: 2px solid #E0B865; background: rgba(224, 184, 101, 0.1); cursor: pointer;">
+              <p style="font-size: 11px; font-weight: 600;">Monthly VIP</p>
+              <p class="font-serif" style="font-size: 20px; color: #E0B865; margin: 4px 0;">$4.99</p>
+              <p style="font-size: 8px; color: #B9A9D0;">Billed monthly</p>
+            </div>
+            <div id="plan-annual" onclick="selectPlan('annual')" style="padding: 12px; border-radius: 10px; border: 1px solid #3D246C; background: #10061F; cursor: pointer; position: relative;">
+              <span style="position: absolute; top: -6px; right: 6px; background: #E0B865; color: #0E071A; font-size: 8px; font-weight: 800; padding: 2px 5px; border-radius: 6px;">SAVE 33%</span>
+              <p style="font-size: 11px; font-weight: 600;">Annual VIP</p>
+              <p class="font-serif" style="font-size: 20px; color: #E0B865; margin: 4px 0;">$39.99</p>
+              <p style="font-size: 8px; color: #B9A9D0;">$3.33 / month</p>
+            </div>
+          </div>
+
+          <div style="background: #10061F; border-radius: 10px; padding: 12px; text-align: left; margin-bottom: 16px; font-size: 11px; line-height: 1.8;">
+            <p style="color: #E0B865; font-weight: 700; margin-bottom: 6px;">MEMBERSHIP PRIVILEGES</p>
+            <p>✓ Unlimited Haute AI styling consultations</p>
+            <p>✓ Advanced silhouette & color matching</p>
+            <p>✓ Limitless wardrobe capacity</p>
+            <p>✓ Priority Atelier processing</p>
+          </div>
+
+          <button onclick="upgradeVIP()" class="gold-btn" style="width: 100%; padding: 14px; font-size: 13px;" id="vip-btn">Subscribe to VIP Elite</button>
+          <p style="font-size: 9px; color: #8D7B9F; margin-top: 8px;">Managed securely via Google Play. Cancel anytime.</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: ACCOUNT -->
+      <section id="tab-account" class="tab-content">
+        <div id="account-view"></div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav style="position: fixed; bottom: 0; left: 0; right: 0; height: 60px; background: #180D2B; border-top: 1px solid #3D246C; display: flex; justify-content: space-around; align-items: center; max-width: 480px; margin: 0 auto; z-index: 100;">
+      <button onclick="switchTab('closet')" class="nav-btn active" id="btn-closet"><span style="font-size: 17px;">👗</span><span style="font-size: 10px;">Closet</span></button>
+      <button onclick="switchTab('stylist')" class="nav-btn" id="btn-stylist"><span style="font-size: 17px;">✨</span><span style="font-size: 10px;">Stylist</span></button>
+      <button onclick="switchTab('premium')" class="nav-btn" id="btn-premium"><span style="font-size: 17px;">👑</span><span style="font-size: 10px;">VIP Elite</span></button>
+      <button onclick="switchTab('account')" class="nav-btn" id="btn-account"><span style="font-size: 17px;">👤</span><span style="font-size: 10px;">Account</span></button>
+    </nav>
+
+  </div>
+
+  <script>
+    const INITIAL_ITEMS = [
+      { id: '1', name: 'Silk Ivory Blouse', category: 'Tops', brand: 'Atelier Maison', isFav: true, img: 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&w=400&q=80' },
+      { id: '2', name: 'Tailored Black Trousers', category: 'Bottoms', brand: 'Haute Bespoke', isFav: true, img: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=400&q=80' },
+      { id: '3', name: 'Cashmere Camel Trench', category: 'Outerwear', brand: 'Editorial Luxury', isFav: false, img: 'https://images.unsplash.com/photo-1544923246-77307dd654cb?auto=format&fit=crop&w=400&q=80' },
+      { id: '4', name: 'Leather Chelsea Boots', category: 'Footwear', brand: 'Milano Bespoke', isFav: true, img: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=400&q=80' }
+    ];
+
+    let items = JSON.parse(localStorage.getItem('noveira_closet') || JSON.stringify(INITIAL_ITEMS));
+    let user = JSON.parse(localStorage.getItem('noveira_user') || 'null');
+    let currentFilter = 'All';
+    let selectedPlan = 'monthly';
+    let isSignUp = false;
+
+    function saveState() {
+      localStorage.setItem('noveira_closet', JSON.stringify(items));
+      if (user) localStorage.setItem('noveira_user', JSON.stringify(user));
+      else localStorage.removeItem('noveira_user');
+      updateUI();
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('tab-active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('tab-active');
+      document.getElementById('btn-' + tabId).classList.add('active');
+    }
+
+    function setFilter(cat) {
+      currentFilter = cat;
+      renderCloset();
+    }
+
+    function toggleFav(id) {
+      items = items.map(i => i.id === id ? { ...i, isFav: !i.isFav } : i);
+      saveState();
+    }
+
+    function deleteItem(id) {
+      if (confirm('Remove this piece from your closet?')) {
+        items = items.filter(i => i.id !== id);
+        saveState();
+      }
+    }
+
+    function addItem(e) {
+      e.preventDefault();
+      const name = document.getElementById('in-name').value.trim();
+      const category = document.getElementById('in-cat').value;
+      const brand = document.getElementById('in-brand').value.trim() || 'Haute Maison';
+      const img = document.getElementById('in-img').value.trim() || 'https://images.unsplash.com/photo-1598554747436-c9293d6a588f?auto=format&fit=crop&w=400&q=80';
+      if (!name) return;
+      items.unshift({ id: Date.now().toString(), name, category, brand, isFav: false, img });
+      document.getElementById('in-name').value = '';
+      saveState();
+    }
+
+    function selectPlan(plan) {
+      selectedPlan = plan;
+      const m = document.getElementById('plan-monthly');
+      const a = document.getElementById('plan-annual');
+      if (plan === 'monthly') {
+        m.style.border = '2px solid #E0B865'; m.style.background = 'rgba(224, 184, 101, 0.1)';
+        a.style.border = '1px solid #3D246C'; a.style.background = '#10061F';
+      } else {
+        a.style.border = '2px solid #E0B865'; a.style.background = 'rgba(224, 184, 101, 0.1)';
+        m.style.border = '1px solid #3D246C'; m.style.background = '#10061F';
+      }
+    }
+
+    function upgradeVIP() {
+      if (!user) { switchTab('account'); return; }
+      user.tier = selectedPlan;
+      saveState();
+      alert('👑 Welcome to Noveira VIP Elite! Your privileges are now active.');
+    }
+
+    function curateLook() {
+      const occ = document.getElementById('stylist-occ').value;
+      const clim = document.getElementById('stylist-clim').value;
+      const top = items.find(i => i.category === 'Tops') || items[0];
+      const bottom = items.find(i => i.category === 'Bottoms') || items[1];
+      const outer = items.find(i => i.category === 'Outerwear') || items[2];
+      const selected = [top, bottom, outer].filter(Boolean);
+
+      document.getElementById('stylist-result').innerHTML = `
+        <div style="background:#10061F; border:1px solid #E0B865; border-radius:10px; padding:14px; margin-top:10px;">
+          <p style="font-size:9px; color:#E0B865; font-weight:700; text-transform:uppercase;">Curated Look</p>
+          <h4 class="font-serif" style="font-size:16px; margin:4px 0 8px 0;">Atelier Look for ${occ}</h4>
+          <p style="font-size:11px; color:#B9A9D0; line-height:1.6; font-style:italic; margin-bottom:10px;">"Tailored exclusively for ${occ} in ${clim}. Pairs your ${top?.name || 'top'} with ${bottom?.name || 'bottom'}."</p>
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:6px;">
+            ${selected.map(p => `
+              <div style="background:#180D2B; padding:5px; border-radius:6px; text-align:center; border:1px solid #3D246C;">
+                <img src="${p.img}" style="width:100%; height:55px; object-fit:cover; border-radius:4px; margin-bottom:3px;" />
+                <p style="font-size:8px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.name}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const name = isSignUp ? document.getElementById('auth-name').value.trim() : email.split('@')[0];
+      if (!email) return;
+      user = { name: name || 'Patron', email, tier: 'free' };
+      saveState();
+    }
+
+    function signOut() {
+      user = null;
+      saveState();
+      switchTab('closet');
+    }
+
+    function clearData() {
+      if (confirm('Permanently delete all wardrobe items and reset your atelier?')) {
+        localStorage.clear();
+        window.location.reload();
+      }
+    }
+
+    function renderCloset() {
+      const filtered = currentFilter === 'All' ? items : items.filter(i => i.category === currentFilter);
+      document.getElementById('closet-grid').innerHTML = filtered.map(item => `
+        <div class="card" style="padding:0; overflow:hidden; position:relative;">
+          <div style="height:130px; width:100%; position:relative; background:#000;">
+            <img src="${item.img}" style="width:100%; height:100%; object-fit:cover;" />
+            <span onclick="toggleFav('${item.id}')" style="position:absolute; top:6px; right:6px; cursor:pointer; background:rgba(0,0,0,0.6); border-radius:50%; padding:3px 5px; font-size:12px;">
+              ${item.isFav ? '❤️' : '🤍'}
+            </span>
+          </div>
+          <div style="padding:10px;">
+            <p style="font-weight:700; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</p>
+            <p style="font-size:9px; color:#E0B865; margin:2px 0;">${item.category}</p>
+            <p style="font-size:9px; color:#B9A9D0;">${item.brand}</p>
+            <button onclick="deleteItem('${item.id}')" style="margin-top:6px; background:none; border:none; color:#EF4444; font-size:10px; cursor:pointer;">Remove</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAccount() {
+      const view = document.getElementById('account-view');
+      if (user) {
+        const isVip = user.tier !== 'free';
+        view.innerHTML = `
+          <div class="card" style="text-align:center;">
+            <div style="width:56px; height:56px; border-radius:50%; background:#261545; border:2px solid #E0B865; display:flex; align-items:center; justify-content:center; margin:0 auto 10px auto; font-size:22px; font-weight:700; color:#E0B865;">
+              ${user.name.charAt(0).toUpperCase()}
+            </div>
+            <h2 class="font-serif" style="font-size:18px;">${user.name}</h2>
+            <p style="font-size:11px; color:#B9A9D0; margin-top:2px;">${user.email}</p>
+            <div style="margin:14px 0; padding:10px; background:#10061F; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-size:11px; color:#B9A9D0;">Tier:</span>
+              <span style="font-size:11px; font-weight:700; color:${isVip ? '#E0B865' : '#FAF8F5'};">${isVip ? '👑 VIP Elite' : 'Standard Free'}</span>
+            </div>
+            <button onclick="signOut()" style="width:100%; padding:11px; background:#261545; border:1px solid #3D246C; color:#FAF8F5; border-radius:8px; font-size:12px; cursor:pointer;">Sign Out</button>
+            <div style="margin-top:20px; border-top:1px solid #3D246C; padding-top:14px; text-align:left;">
+              <p style="font-size:10px; color:#EF4444; font-weight:700;">Data & Privacy</p>
+              <button onclick="clearData()" style="width:100%; margin-top:8px; padding:9px; background:#7F1D1D; border:1px solid #EF4444; color:#FECACA; border-radius:8px; font-size:11px; cursor:pointer;">Erase All Wardrobe Data</button>
+            </div>
+          </div>
+        `;
+      } else {
+        view.innerHTML = `
+          <div class="card">
+            <h2 class="font-serif gold-text" style="font-size:20px; text-align:center; margin-bottom:12px;">
+              ${isSignUp ? 'Create Wardrobe Account' : 'Sign In to Atelier'}
+            </h2>
+            <form onsubmit="handleAuth(event)">
+              ${isSignUp ? '<input id="auth-name" type="text" required placeholder="Full Name..." />' : ''}
+              <input id="auth-email" type="email" required placeholder="Email address..." />
+              <input id="auth-password" type="password" required placeholder="Password..." />
+              <button type="submit" class="gold-btn" style="width:100%; padding:12px; font-size:13px; margin-top:4px;">
+                ${isSignUp ? 'Register Account' : 'Sign In'}
+              </button>
+            </form>
+            <p style="text-align:center; font-size:11px; color:#B9A9D0; margin-top:12px;">
+              ${isSignUp ? 'Already registered? <span onclick="isSignUp=false; renderAccount();" style="color:#E0B865; cursor:pointer; font-weight:700;">Sign In</span>' : 'New to Noveira? <span onclick="isSignUp=true; renderAccount();" style="color:#E0B865; cursor:pointer; font-weight:700;">Create account</span>'}
+            </p>
+          </div>
+        `;
+      }
+    }
+
+    function updateUI() {
+      const isVip = user && user.tier !== 'free';
+      document.getElementById('header-badge').innerHTML = isVip
+        ? '<span style="background:rgba(224,184,101,0.15); border:1px solid #E0B865; padding:4px 8px; border-radius:14px; font-size:10px; color:#F2D594; font-weight:700;">👑 VIP ELITE</span>'
+        : '<button onclick="switchTab(\'premium\')" class="gold-btn" style="padding:6px 12px; font-size:11px;">👑 Upgrade</button>';
+      
+      const vipBtn = document.getElementById('vip-btn');
+      if (vipBtn) vipBtn.innerText = isVip ? 'VIP Membership Active' : 'Subscribe to VIP Elite';
+
+      renderCloset();
+      renderAccount();
+    }
+
+    // Initialize immediately
+    updateUI();
+  </script>
+</body>
+</html>
